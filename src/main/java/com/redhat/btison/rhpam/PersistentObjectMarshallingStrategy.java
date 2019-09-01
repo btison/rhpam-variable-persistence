@@ -34,10 +34,19 @@ public class PersistentObjectMarshallingStrategy implements ObjectMarshallingStr
 
     public byte[] marshal(Context context, ObjectOutputStream objectOutputStream, Object o) throws IOException {
         PersistentObject p = (PersistentObject) o;
+        String uuid;
+        if (p.getId() == null) {
+            uuid = UUID.randomUUID().toString();
+            p.setId(uuid);
+        } else {
+            uuid = p.getId();
+        }
         byte[] bytes = new ObjectMapper().writeValueAsBytes(p);
-        String uuid = UUID.randomUUID().toString();
 
         File f = new File(tmpdir, uuid);
+        if (f.exists()) {
+            f.delete();
+        }
         Files.write(f.toPath(), bytes);
 
         ByteArrayOutputStream buff = new ByteArrayOutputStream();
